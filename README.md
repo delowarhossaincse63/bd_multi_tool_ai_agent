@@ -145,6 +145,14 @@ python ingest.py
 python agent.py "How many hospitals are in Dhaka?"
 ```
 
+## Submission Requirements
+
+This repository meets the submission requirements:
+
+- GitHub repo with full codebase (`agent.py`, `ingest.py`, `tools/`, `requirements.txt`, `.env.example`, `.gitignore`, `README.md`).
+- `README.md` with setup and usage instructions.
+- Optional demo: create a Google Colab link if needed by the reviewer.
+
 ## Recommended commit message
 
 ```text
