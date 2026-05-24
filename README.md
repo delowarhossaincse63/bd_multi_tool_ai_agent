@@ -118,43 +118,6 @@ python agent.py "How many hospitals are in Dhaka?"
 - `Show popular restaurants serving Bengali cuisine in Sylhet.`
 - `What is the role of DGHS in Bangladesh?`
 
-## Notes for submission
-
-- Keep `.env` out of the repository.
-- If you want the repository to be ready for review, include `.env.example` instead of `.env`.
-- If your teacher wants the project to run without downloading datasets, you can remove `dbs/*.db` from `.gitignore`, commit the DB files, and mention that the databases are already built.
-
-## Submission checklist
-
-Before sharing the GitHub link with your instructor, make sure:
-
-- `.env` is not tracked (should be listed in `.gitignore`).
-- `README.md`, `requirements.txt`, and `ingest.py` are present and up-to-date.
-- `.env.example` contains placeholders (no real secrets).
-- Optionally include `dbs/*.db` only if your instructor asked for prebuilt databases.
-
-Include the repository link and a short run command for the reviewer:
-
-```powershell
-git clone https://github.com/delowarhossaincse63/bd_multi_tool_ai_agent.git
-cd bd_multi_tool_ai_agent
-python -m venv venv
-venv\Scripts\activate
-pip install -r requirements.txt
-copy .env.example .env
-# add your API keys into .env, then run:
-python ingest.py
-python agent.py "How many hospitals are in Dhaka?"
-```
-
-## Submission Requirements
-
-This repository meets the submission requirements:
-
-- GitHub repo with full codebase (`agent.py`, `ingest.py`, `tools/`, `requirements.txt`, `.env.example`, `.gitignore`, `README.md`).
-- `README.md` with setup and usage instructions.
-- Optional demo: create a Google Colab link if needed by the reviewer.
-
 ## Recommended commit message
 
 ```text
