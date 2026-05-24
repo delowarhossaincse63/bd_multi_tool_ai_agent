@@ -1,0 +1,17 @@
+# Python artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+
+# Env files
+.env
+
+# SQLite databases
+dbs/*.db
+
+# Jupyter notebooks checkpoints
+.ipynb_checkpoints/

@@ -1,0 +1,10 @@
+langchain
+langchain-community
+langchain-openai
+openai
+pandas
+datasets
+python-dotenv
+google-search-results
+sqlalchemy
+tqdm
