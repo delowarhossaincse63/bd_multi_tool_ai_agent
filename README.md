@@ -1,7 +1,5 @@
 # BD Agent
 
-GitHub repository: https://github.com/delowarhossaincse63/bd_multi_tool_ai_agent
-
 A simple AI agent for Bangladeshi datasets. This project loads three HuggingFace datasets into SQLite databases, exposes SQL tools for hospitals, institutions, and restaurants, and adds a web search tool for general knowledge.
 
 ## Project structure
