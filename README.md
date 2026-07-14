@@ -1,39 +1,76 @@
-# 🇧🇩 BD Agent — Multi-Tool AI Agent for Bangladesh
+<div align="center">
 
-An AI assistant that can answer real questions about Bangladesh — hospitals, educational institutions, and restaurants — by searching real datasets, and falls back to the web for anything else.
+# 🇧🇩 BD Agent
+### Multi-Tool AI Agent for Bangladesh
 
-Ask it things like:
+**An LLM-powered agent that answers real questions about Bangladeshi hospitals, institutions, and restaurants — grounded in real datasets, not hallucinations.**
 
-> "How many hospitals are in Dhaka?"
-> "List hospitals with ICU facilities in Chittagong."
-> "Show popular restaurants serving Bengali cuisine in Sylhet."
-> "What is the role of DGHS in Bangladesh?"
+[![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat&logo=python&logoColor=white)](https://www.python.org/)
+[![LangChain](https://img.shields.io/badge/LangChain-Agent%20Framework-1C3C3C?style=flat)](https://www.langchain.com/)
+[![SQLite](https://img.shields.io/badge/SQLite-Database-003B57?style=flat&logo=sqlite&logoColor=white)](https://www.sqlite.org/)
+[![HuggingFace](https://img.shields.io/badge/🤗%20Datasets-HuggingFace-FFD21E?style=flat)](https://huggingface.co/datasets)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](#license)
 
-...and it will figure out *which data source to use* and give you a real answer.
+[Overview](#-overview) • [Demo](#-example-queries) • [Architecture](#-architecture) • [Setup](#-getting-started) • [Skills Demonstrated](#-skills-demonstrated)
+
+</div>
 
 ---
 
-## 🤔 What is this project?
+## 📌 Overview
 
-This is a **Python-based AI agent** — a program that combines a large language model (like GPT) with a set of "tools" it can choose from to answer questions, instead of just guessing from memory.
+**BD Agent** is a tool-using AI agent built with **LangChain** that answers questions about Bangladesh by querying **real structured data** instead of relying purely on an LLM's memory. It combines:
 
-Concretely, it:
+- 🗄️ **Three real-world datasets** (hospitals, educational institutions, restaurants) ingested from HuggingFace into local SQLite databases
+- 🧠 **An LLM-based agent** that reasons about which tool best answers a given question
+- 🌐 **A live web-search tool** for general knowledge questions outside the datasets
 
-1. Downloads three real datasets about Bangladesh from HuggingFace (hospitals, institutions, restaurants).
-2. Stores them as local SQLite databases.
-3. Gives an AI agent (built with **LangChain**) the ability to query those databases directly using SQL — so answers come from real data, not hallucinated guesses.
-4. Adds a **web search tool** (via SerpAPI) for general questions that aren't in the datasets.
-5. Lets the agent decide, per question, which tool is the right one to use.
+The result: a domain-specific assistant that gives **accurate, data-backed answers** — a practical demonstration of **retrieval-augmented, tool-using AI systems**, one of the most in-demand patterns in applied AI/ML engineering today.
 
-## 💡 Why this project exists
+## 💬 Example Queries
 
-Most general-purpose AI chatbots don't have accurate, structured, up-to-date information specific to Bangladesh — things like which hospitals have ICUs, which universities exist, or what restaurants are popular in a given city. This project solves that by:
+```
+> How many hospitals are in Dhaka?
+> List hospitals with ICU facilities in Chittagong.
+> What universities are listed in the institutions database?
+> Show popular restaurants serving Bengali cuisine in Sylhet.
+> What is the role of DGHS in Bangladesh?
+```
 
-- Grounding answers in **real, structured datasets** instead of relying on an LLM's memory (which reduces hallucination).
-- Demonstrating a practical, working example of a **tool-using AI agent** — a pattern that's increasingly important in real-world AI applications.
-- Being a reusable template: anyone can plug in a new Bangladesh (or any country) dataset and instantly get a new queryable tool.
+The agent automatically routes each question to the correct tool — SQL query against the right database, or a live web search — without the user needing to specify which.
 
-In short: **it's a small, working example of how to build a trustworthy, data-grounded AI agent** — useful both as a learning project and as a real, functional assistant.
+---
+
+## 🏗️ Architecture
+
+```
+                         ┌──────────────────────┐
+                         │     User Question     │
+                         └──────────┬───────────┘
+                                    │
+                                    ▼
+                       ┌────────────────────────┐
+                       │   agent.py (LangChain)  │
+                       │  LLM decides best tool  │
+                       └────────────┬───────────┘
+                                    │
+          ┌─────────────┬──────────┼──────────┬─────────────┐
+          ▼              ▼          ▼          ▼             
+   ┌─────────────┐┌─────────────┐┌─────────────┐┌──────────────┐
+   │ Hospitals   ││ Institutions││ Restaurants ││  Web Search  │
+   │  SQL Tool   ││   SQL Tool  ││   SQL Tool  ││  (SerpAPI)   │
+   └──────┬──────┘└──────┬──────┘└──────┬──────┘└──────────────┘
+          ▼              ▼              ▼
+   dbs/hospitals.db dbs/institutions.db dbs/restaurants.db
+          │              │              │
+          └──────────────┴──────────────┘
+                          ▼
+                  ┌───────────────┐
+                  │ Final Answer  │
+                  └───────────────┘
+```
+
+**Data pipeline:** `ingest.py` pulls each dataset from HuggingFace → converts to a pandas DataFrame → normalizes column names → writes to a local SQLite `.db` file via `to_sql()`.
 
 ---
 
@@ -41,53 +78,31 @@ In short: **it's a small, working example of how to build a trustworthy, data-gr
 
 ```
 bd_multi_tool_ai_agent/
-├── agent.py                  # Main entry point — builds & runs the AI agent
-├── ingest.py                 # Downloads datasets & builds the SQLite databases
+├── agent.py                  # Entry point — builds & runs the LangChain agent
+├── ingest.py                 # Downloads datasets & builds SQLite databases
 ├── tools/
 │   ├── db_tools.py           # SQL tools: hospitals, institutions, restaurants
-│   └── web_search_tool.py    # Web search tool (SerpAPI) for general questions
+│   └── web_search_tool.py    # SerpAPI web-search tool
 ├── requirements.txt          # Python dependencies
-├── .env.example               # Template for your API keys
-└── .gitignore                 # Files/folders kept out of Git (secrets, DBs, venv)
+├── .env.example               # API key template
+└── .gitignore                 # Excludes secrets, DBs, venv
 ```
 
-## 🏗️ How It Works (High-Level)
+### 📊 Datasets
 
-```
-User question
-     │
-     ▼
- agent.py  ──►  LLM decides which tool fits the question
-     │
-     ├──► Hospitals SQL tool ──► dbs/hospitals.db
-     ├──► Institutions SQL tool ──► dbs/institutions.db
-     ├──► Restaurants SQL tool ──► dbs/restaurants.db
-     └──► Web search tool ──► SerpAPI (general knowledge)
-     │
-     ▼
-  Final answer
-```
-
-- **`ingest.py`** downloads each dataset from HuggingFace, cleans up the column names (lowercase, special characters → underscores, duplicates de-duplicated), and saves it as a table in a local SQLite `.db` file.
-- **`tools/db_tools.py`** wraps each database as a LangChain-compatible tool that can run SQL queries and return results.
-- **`tools/web_search_tool.py`** wraps SerpAPI so the agent can search the web when a question falls outside the datasets.
-- **`agent.py`** wires the LLM and all the tools together into one agent that picks the right tool automatically.
-
-### 📊 Datasets used
-
-| Dataset (HuggingFace) | Local table |
+| Source (HuggingFace) | Local Table |
 |---|---|
 | `Mahadih534/Institutional-Information-of-Bangladesh` | `institutions` |
 | `Mahadih534/all-bangladeshi-hospitals` | `hospitals` |
 | `Mahadih534/Bangladeshi-Restaurant-Data` | `restaurants` |
 
-Want to add another dataset? Just add a `save_dataset_to_db(dataset_name, table_name, db_path)` call in `ingest.py`.
+Adding a new dataset is a one-line change — add a `save_dataset_to_db(dataset_name, table_name, db_path)` call in `ingest.py`.
 
 ---
 
 ## 🚀 Getting Started
 
-### 1. Clone & enter the project
+### 1. Clone the repository
 ```bash
 git clone https://github.com/delowarhossaincse63/bd_multi_tool_ai_agent.git
 cd bd_multi_tool_ai_agent
@@ -105,12 +120,12 @@ source venv/bin/activate     # macOS / Linux
 pip install -r requirements.txt
 ```
 
-### 4. Set up your API keys
+### 4. Configure environment variables
 ```bash
 copy .env.example .env        # Windows
 cp .env.example .env          # macOS / Linux
 ```
-Then open `.env` and fill in:
+Then add your keys to `.env`:
 ```
 OPENAI_API_KEY=your_openai_key_here
 SERPAPI_API_KEY=your_serpapi_key_here
@@ -120,26 +135,31 @@ SERPAPI_API_KEY=your_serpapi_key_here
 ```bash
 python ingest.py
 ```
-This creates:
-- `dbs/hospitals.db`
-- `dbs/institutions.db`
-- `dbs/restaurants.db`
+Creates `dbs/hospitals.db`, `dbs/institutions.db`, `dbs/restaurants.db`.
 
 ### 6. Run the agent
-Interactive mode:
 ```bash
-python agent.py
-```
-Or ask a direct question:
-```bash
-python agent.py "How many hospitals are in Dhaka?"
+python agent.py                                   # interactive mode
+python agent.py "How many hospitals are in Dhaka?" # direct query
 ```
 
 ---
 
-## 🔍 Quick Database Checks
+## 🧠 Skills Demonstrated
 
-Using the `sqlite3` CLI:
+This project showcases practical, job-relevant experience with:
+
+- **LLM Agent Design** — building tool-using agents with LangChain that reason about task routing
+- **Data Engineering** — ETL pipeline: dataset ingestion, cleaning, normalization, and loading into SQLite
+- **API Integration** — OpenAI API and SerpAPI, with secure key management via `.env`
+- **Database Design** — schema normalization, SQL query tools, de-duplication logic
+- **Software Engineering Practices** — modular code structure, `.gitignore` hygiene, secret management, reproducible setup
+- **Applied AI for Real-World Data** — grounding LLM output in verified datasets to reduce hallucination
+
+---
+
+## 🔍 Verifying the Databases
+
 ```bash
 sqlite3 dbs/hospitals.db "PRAGMA table_info('hospitals');"
 sqlite3 dbs/hospitals.db "SELECT COUNT(*) FROM hospitals;"
@@ -157,15 +177,15 @@ conn.close()
 
 ---
 
-## 🛡️ What to Keep Out of GitHub
+## 🛡️ Security Notes
 
-These are already excluded by `.gitignore` — never commit them:
-- `.env` (your API keys)
-- `dbs/*.db` (generated database files)
-- `venv/` or `.venv/` (virtual environment)
-- `__pycache__/` and `.pyc` files
+The following are excluded from version control via `.gitignore`:
+- `.env` — API keys
+- `dbs/*.db` — generated database files
+- `venv/` / `.venv/` — virtual environment
+- `__pycache__/`, `*.pyc`
 
-**If you ever accidentally commit a secret**, don't just push a fix on top — remove it from history:
+If a secret is ever committed accidentally:
 ```bash
 git rm --cached .env
 git commit -m "Remove .env from tracking"
@@ -177,29 +197,42 @@ git push -f origin main
 
 ## 🧯 Troubleshooting
 
-| Problem | Fix |
+| Issue | Solution |
 |---|---|
-| `OPENAI_API_KEY is required` | Make sure `.env` exists with the key set, then restart your terminal so it reloads. |
-| GitHub blocks a push (secret detected) | Remove the secret from the file, amend/rebase the commit, then force-push. |
-| Agent gives wrong/odd answers | Check the console for errors and confirm all required keys are in `.env`. |
-| Web search doesn't work | Confirm `SERPAPI_API_KEY` is set — without it, the agent falls back to SQL tools only. |
+| `OPENAI_API_KEY is required` | Confirm `.env` exists and contains the key; restart the terminal. |
+| GitHub blocks push (secret detected) | Remove the secret, amend the commit, force-push. |
+| Agent gives unexpected answers | Check console logs for tracebacks; verify all keys in `.env`. |
+| Web search not working | Confirm `SERPAPI_API_KEY` is set — without it, only SQL tools work. |
 
 ---
 
-## 🧪 Quick Test
+## 🗺️ Roadmap
 
-```bash
-python ingest.py
-python agent.py "How many hospitals are in Dhaka?"
-```
+- [ ] Add more Bangladesh-specific datasets (transport, weather, government services)
+- [ ] Build a lightweight web UI (Streamlit/FastAPI)
+- [ ] Add caching for repeated queries
+- [ ] Deploy as a public demo
 
 ---
+
+## 🤝 Contributing
+
+Contributions, issues, and feature requests are welcome. Feel free to check the [issues page](https://github.com/delowarhossaincse63/bd_multi_tool_ai_agent/issues).
+
+## 📄 License
+
+This project is licensed under the MIT License.
 
 ## 📬 Contact
 
-**Delowar Hossain** — delowarhossain.cse.63@gmail.com
+**Delowar Hossain**
+📧 delowarhossain.cse.63@gmail.com
+🔗 [GitHub](https://github.com/delowarhossaincse63)
 
 ---
 
-## 🏷️ Topics
-`python` · `sqlite` · `langchain` · `huggingface` · `bangladesh` · `data-ingestion` · `web-search-agent`
+<div align="center">
+
+⭐ If you find this project useful, consider giving it a star!
+
+</div>
